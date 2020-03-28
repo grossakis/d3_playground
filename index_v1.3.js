@@ -63,20 +63,22 @@ mSvg.on('touchmove',(d,i,n)=>{
     // mSvg.style('background-color', ()=>'hsl(173, '+x+'%, '+y/2+'%)');
 
 
-    // if(mSvg._groups[0][0].children.length < 150){
+    if(mSvg._groups[0][0].children.length > 300){
+        d3.select(mSvg._groups[0][0].children[0]).remove();
+    }
 
         mSvg.append('circle')
             .attr('cx',touchX)
             .attr('cy',touchY)
             .attr('r',3)
             .style('fill', 'none')
-            .style('stroke-width', 0.1)
+            .style('stroke-width', 1)
             .style('stroke', ()=>'hsl('+((359*touchX)/100).toFixed(0)+', 100%, 50%)')
             .transition()
-            .duration(6000)
+            .duration(3000)
             .attr("r", 30)
-            .style("opacity", 0)
-            .style('stroke-width', 1)
+            // .style("opacity", 0.1)
+            .style('stroke-width', 0.1)
             .ease(d3.easeElasticOut)
         
 
@@ -86,6 +88,6 @@ mSvg.on('touchmove',(d,i,n)=>{
             // .attr('cy',(d,i,n)=>{
             //     return (Math.random()*100)>50? touchY+(Math.random()*100) : touchY-(Math.random()*100)
             // })
-            .remove()
+            // .remove()
     // }
 });
