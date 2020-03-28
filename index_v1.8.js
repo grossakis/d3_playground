@@ -27,6 +27,7 @@ let colRef = 1;
 // repeatFlagToggle();
 
 let drag = (svgItem,x,y) =>{
+    // console.log('drag');
 
     if(addFlag){
 
@@ -34,27 +35,27 @@ let drag = (svgItem,x,y) =>{
         svgItem.append('circle')
             .attr('cx',x)
             .attr('cy',y)
-            .attr('r',0.1)
+            .attr('r',1)
             .style('fill', 'none')
             .style('stroke-width', 0.1)
             // .style('stroke', ()=>'hsl('+((359*x)/100).toFixed(0)+', 100%, 50%)')
             .style('stroke', ()=>'hsl('+colRef+', 100%, 50%)')
             .transition()
-            .duration(500)
+            .duration(1000)
             .attr("r", 15)
-            .style("opacity", 1)
-            .style('stroke-width', 0.6)
+            .style("opacity", 0.5)
+            .style('stroke-width', 2)
             .ease(d3.easeSinOut)
     
-            .each(function(d, i) {
-    
+            .each(function(d, i, n) {
+                // this = n[i]
                 d3.select(this)
                 .transition()
-                .delay(500)
-                .duration(500)
+                .delay(1000)
+                .duration(1000)
                 .attr('r', 1)
-                .attr('stroke-width', 0.1)
-                .style("opacity", 0)
+                .style('stroke-width', '0.1px')
+                .style("opacity", 0.5)
                 .remove();
                 
             });
@@ -91,9 +92,23 @@ let addEvent = ()=>{
     
             let x = parseFloat(((mouseX/winWidth)*100).toFixed(0));
             let y = parseFloat(((mouseY/winHeight)*100).toFixed(0));
+
+                drag(mSvg,x,y)
     
-            drag(mSvg,x,y);
         })
+
+        // mSvg.on('mouseover',()=>{
+        //     console.log('bapa')
+        //     let mouseX = event.clientX;
+        //     let mouseY = event.clientY;
+        //     let winWidth = window.innerWidth;
+        //     let winHeight = window.innerHeight;
+    
+        //     let x = parseFloat(((mouseX/winWidth)*100).toFixed(0));
+        //     let y = parseFloat(((mouseY/winHeight)*100).toFixed(0));
+    
+        //     drag(mSvg,x,y);
+        // })
     }
 
 }
