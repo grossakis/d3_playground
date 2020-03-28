@@ -14,13 +14,17 @@ let rand = (min,max)=>parseInt((Math.random()*(max+1))+min);
 let addFlag=true;
 let colRef = 1;
 
-let repeatFlagToggle =()=>{
+// ()=>{
+
+    setInterval(()=>{
+        colRef === 359 ? colRef=0 : colRef++;
+    },10);
+
     setInterval(()=>{
         addFlag=!addFlag;
-        colRef === 359 ? colRef=0 : colRef++;
-    },50);
-};
-repeatFlagToggle();
+    },40);
+// };
+// repeatFlagToggle();
 
 let drag = (svgItem,x,y) =>{
 
@@ -39,7 +43,7 @@ let drag = (svgItem,x,y) =>{
             .duration(500)
             .attr("r", 15)
             .style("opacity", 1)
-            .style('stroke-width', 0.5)
+            .style('stroke-width', 0.6)
             .ease(d3.easeSinOut)
     
             .each(function(d, i) {
