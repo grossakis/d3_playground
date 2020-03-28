@@ -73,10 +73,11 @@ mSvg.on('touchmove',(d,i,n)=>{
             .style('stroke-width', 0.1)
             .style('stroke', ()=>'hsl('+((359*touchX)/100).toFixed(0)+', 100%, 50%)')
             .transition()
-            .duration(1000)
+            .duration(6000)
             .attr("r", 30)
             .style("opacity", 0)
             .style('stroke-width', 1)
+            .ease(d3.easeElasticOut)
         
 
             // .attr('cx',(d,i,n)=>{
