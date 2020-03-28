@@ -2,7 +2,7 @@ let mSvg = d3.select('#main-svg');
 
 let rand = (min,max)=>parseInt((Math.random()*(max+1))+min);
 
-mSvg.on('mousemove',()=>{
+mSvg.on('touchmove',()=>{
 
     let mouseX = event.clientX;
     let mouseY = event.clientY;
