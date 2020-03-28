@@ -11,21 +11,54 @@ let mSvg = d3.select('#main-svg');
 
 let rand = (min,max)=>parseInt((Math.random()*(max+1))+min);
 
-let drag = (svgItem,x,y) =>{
-    return svgItem.append('circle')
-        .attr('cx',x)
-        .attr('cy',y)
-        .attr('r',3)
-        .style('fill', 'none')
-        .style('stroke-width', 1)
-        .style('stroke', ()=>'hsl('+((359*x)/100).toFixed(0)+', 100%, 50%)')
-        .transition()
-        .duration(3000)
-        .attr("r", 20)
-        .style("opacity", 0.5)
-        .style('stroke-width', 0.5)
-        .ease(d3.easeElasticOut)
+let addFlag=true;
+let colRef = 1;
 
+let repeatFlagToggle =()=>{
+    setInterval(()=>{
+        addFlag=!addFlag;
+        colRef === 359 ? colRef=0 : colRef++;
+    },50);
+};
+repeatFlagToggle();
+
+let drag = (svgItem,x,y) =>{
+
+    if(addFlag){
+
+        addFlag = !addFlag;
+        svgItem.append('circle')
+            .attr('cx',x)
+            .attr('cy',y)
+            .attr('r',0.1)
+            .style('fill', 'none')
+            .style('stroke-width', 0.1)
+            // .style('stroke', ()=>'hsl('+((359*x)/100).toFixed(0)+', 100%, 50%)')
+            .style('stroke', ()=>'hsl('+colRef+', 100%, 50%)')
+            .transition()
+            .duration(500)
+            .attr("r", 15)
+            .style("opacity", 1)
+            .style('stroke-width', 0.5)
+            .ease(d3.easeSinOut)
+    
+            .each(function(d, i) {
+    
+                d3.select(this)
+                .transition()
+                .delay(500)
+                .duration(500)
+                .attr('r', 1)
+                .attr('stroke-width', 0.1)
+                .style("opacity", 0)
+                .remove();
+                
+            });
+    }
+
+    
+        
+        
 }
 
 let addEvent = ()=>{
@@ -40,9 +73,6 @@ let addEvent = ()=>{
             let x = d3.touches(n[i])[0][0];
             let y = d3.touches(n[i])[0][1];
         
-            if(mSvg._groups[0][0].children.length > 40){
-                d3.select(mSvg._groups[0][0].children[0]).remove();
-            }
         
             drag(mSvg,x,y);
         });
@@ -57,10 +87,6 @@ let addEvent = ()=>{
     
             let x = parseFloat(((mouseX/winWidth)*100).toFixed(0));
             let y = parseFloat(((mouseY/winHeight)*100).toFixed(0));
-        
-            if(mSvg._groups[0][0].children.length > 40){
-                d3.select(mSvg._groups[0][0].children[0]).remove();
-            }
     
             drag(mSvg,x,y);
         })
