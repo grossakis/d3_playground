@@ -63,7 +63,7 @@ mSvg.on('touchmove',(d,i,n)=>{
     // mSvg.style('background-color', ()=>'hsl(173, '+x+'%, '+y/2+'%)');
 
 
-    if(mSvg._groups[0][0].children.length > 300){
+    if(mSvg._groups[0][0].children.length > 200){
         d3.select(mSvg._groups[0][0].children[0]).remove();
     }
 
@@ -77,8 +77,8 @@ mSvg.on('touchmove',(d,i,n)=>{
             .transition()
             .duration(3000)
             .attr("r", 30)
-            // .style("opacity", 0.1)
-            .style('stroke-width', 0.1)
+            .style("opacity", 0.5)
+            .style('stroke-width', 0.5)
             .ease(d3.easeElasticOut)
         
 
