@@ -77,13 +77,14 @@ mSvg.on('touchmove',(d,i,n)=>{
             .attr("r", 30)
             .style("opacity", 0)
             .style('stroke-width', 1)
-            // .attr('cx',(d,i,n)=>d3.select(n[i]).attr('cy')+0.001)
-            .attr('cx',(d,i,n)=>{
-                return (Math.random()*100)>50? touchX+(Math.random()*100) : touchX-(Math.random()*100)
-            })
-            .attr('cy',(d,i,n)=>{
-                return (Math.random()*100)>50? touchY+(Math.random()*100) : touchY-(Math.random()*100)
-            })
+        
+
+            // .attr('cx',(d,i,n)=>{
+            //     return (Math.random()*100)>50? touchX+(Math.random()*100) : touchX-(Math.random()*100)
+            // })
+            // .attr('cy',(d,i,n)=>{
+            //     return (Math.random()*100)>50? touchY+(Math.random()*100) : touchY-(Math.random()*100)
+            // })
             .remove()
     // }
 });
