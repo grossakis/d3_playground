@@ -77,6 +77,7 @@ let drag = (svgItem,x,y) =>{
                 .style('stroke-width', '0.1px')
                 .style("opacity", 0.5)
                 .style('transform','rotate(360deg)')
+                .style('stroke', ()=>'hsl('+colRef+', 30%, 20%)')
                 // .attr("stroke-dasharray", '1 20')
                 .remove();
                 
