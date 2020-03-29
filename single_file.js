@@ -31,11 +31,15 @@ let drag = (svgItem,x,y) =>{
 
     if(addFlag){
 
+
+
         addFlag = !addFlag;
         svgItem.append('circle')
             .attr('cx',x)
             .attr('cy',y)
             .attr('r',1)
+            // .attr("pathLength", 100)
+            // .attr("stroke-dasharray", '0, 100')
             .style('fill', 'none')
             .style('stroke-width', 0.1)
             // .style('stroke', ()=>'hsl('+((359*x)/100).toFixed(0)+', 100%, 50%)')
@@ -45,6 +49,12 @@ let drag = (svgItem,x,y) =>{
             .attr("r", 15)
             .style("opacity", 0.5)
             .style('stroke-width', 2)
+            // .attr("stroke-dasharray", '101')
+
+            // .attr("stroke-dasharray", ()=>{
+            //     let totalLength = this.node().getTotalLength();
+            //     return totalLength
+            // })
             .ease(d3.easeSinOut)
     
             .each(function(d, i, n) {
@@ -56,6 +66,7 @@ let drag = (svgItem,x,y) =>{
                 .attr('r', 1)
                 .style('stroke-width', '0.1px')
                 .style("opacity", 0.5)
+                // .attr("stroke-dasharray", '2, 10')
                 .remove();
                 
             });
