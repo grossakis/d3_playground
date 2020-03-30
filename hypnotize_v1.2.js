@@ -20,16 +20,42 @@ setInterval(()=>{
 // setInterval(()=>{
 //     addFlag=!addFlag;
 // },40);
+
+
+let xOffset = 0;
+let yOffset = 0;
+let incFlag = true
+
+
 let addCircle = ()=>{
+
+
+
+    // let mouseX = event.clientX;
+    // let mouseY = event.clientY;
+    // let winWidth = window.innerWidth;
+    // let winHeight = window.innerHeight;
+
+    // let x = parseFloat(((mouseX/winWidth)*100).toFixed(0));
+    // let y = parseFloat(((mouseY/winHeight)*100).toFixed(0));
+
+
+
     mSvg.append('circle')
-        .attr('cx',50)
-        .attr('cy',50)
+        .attr('cx',50+4*xOffset)
+        // .attr('cx',x)
+        .attr('cy',50+4*yOffset)
+        // .attr('cy',y)
         .attr('r',1)
         .style('fill', 'none')
         .style('stroke-width', 0.1)
         .style('stroke', ()=>'hsl('+colRef+', 100%, 50%)')
         .transition()
-        .duration(6000)
+        .duration(3000)
+        .attr('cx',(d,i,n)=>{
+            let cx = d3.select(n[i]).attr('cx');
+            return parseInt(cx)+1
+        })
         .attr("r", 70)
         .style("opacity", 0.5)
         .style('stroke-width', 2)
@@ -37,8 +63,8 @@ let addCircle = ()=>{
         .each(function(d, i, n) {
             d3.select(this)
             .transition()
-            .delay(6000)
-            .duration(6000)
+            .delay(3000)
+            .duration(3000)
             .attr('r', 1)
             // .style('stroke-width', '0.1px')
             .style("opacity", 0.5)
@@ -50,4 +76,11 @@ let addCircle = ()=>{
 
 setInterval(()=>{
     addCircle();
-},300);
+    if(xOffset === 10){
+        incFlag = false
+    }else if(xOffset === -10){
+        incFlag = true;
+    }
+    incFlag ? xOffset++ : xOffset--;
+    incFlag ? yOffset++ : yOffset--;
+},100);
