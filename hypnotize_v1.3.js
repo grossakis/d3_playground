@@ -24,10 +24,11 @@ setInterval(()=>{
 
 let xOffset = 0;
 let yOffset = 0;
-let incFlag = true
+let incFlag = true;
+let flipFlag = true;
 
 
-let addCircle = ()=>{
+let addCircle = (dirBool)=>{
 
 
 
@@ -42,29 +43,47 @@ let addCircle = ()=>{
 
 
     mSvg.append('circle')
-        .attr('cx',50+4*xOffset)
+        .attr('cx',()=> {
+            if(dirBool){
+                if(flipFlag){
+                    return 50+4*xOffset
+                }else{
+                    return 50-4*xOffset
+                }
+            }else{
+                if(!flipFlag){
+                    return 50+4*xOffset
+                }else{
+                    return 50-4*xOffset
+                }
+            }
+        })
         // .attr('cx',x)
-        .attr('cy',50+4*yOffset)
+        .attr('cy',()=> flipFlag? 50+4*yOffset : (50-4*yOffset))
+        // .attr('cy',()=> {
+    
+        //     !flipFlag? 50+4*yOffset : (50-4*yOffset)
+        // })
         // .attr('cy',y)
         .attr('r',1)
         .style('fill', 'none')
         .style('stroke-width', 0.1)
         .style('stroke', ()=>'hsl('+colRef+', 100%, 50%)')
         .transition()
-        .duration(3000)
+        .duration(6000)
         .attr('cx',(d,i,n)=>{
             let cx = d3.select(n[i]).attr('cx');
             return parseInt(cx)+1
         })
         .attr("r", 70)
         .style("opacity", 0.5)
-        .style('stroke-width', 2)
+        .style('stroke-width', 0.5)
         .ease(d3.easeSinOut)
         .each(function(d, i, n) {
             d3.select(this)
             .transition()
-            .delay(3000)
-            .duration(3000)
+            .delay(6000)
+            .duration(6000)
             .attr('r', 1)
             // .style('stroke-width', '0.1px')
             .style("opacity", 0.5)
@@ -75,7 +94,9 @@ let addCircle = ()=>{
 
 
 setInterval(()=>{
-    addCircle();
+    flipFlag=!flipFlag
+    addCircle(true);
+    addCircle(false);
     if(xOffset === 10){
         incFlag = false
     }else if(xOffset === -10){
