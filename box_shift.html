@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="nav-container">
+        <a href="./index.html" class="nav-link">back</a>
+    </div>
+    
+    <div id="svgBox" style="width: 100%; height: 80vh">
+        <svg id="mainSVG" height="100%" width="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="background-color: black"></svg>
+    </div>
+    <button id="random">RANDOM!</button>
+    <button id="start">START!</button>
+    <button id="stop">STOP!</button>
+
+    <script src="./d3.min.js"></script>
+    <script>
+
+        let numbers = [];
+        for(let i=0;i<101;i++){
+            numbers.push((Math.random()*100).toFixed(0))
+        }
+
+
+
+
+        const svg = d3.select('#mainSVG');
+
+        let g = svg.selectAll()
+            .data(numbers)
+            .enter()
+            .append("g")
+            .classed('rect-group', true);
+
+        let barWidth = 100/numbers.length;
+
+        g.append('rect')
+            .attr('fill', (d,i) => 'hsl(168,'+d+'%,'+50+'%)')
+            .attr('height', '100%')
+            .attr('width', barWidth)
+            // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)+')');
+            .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
+            .classed('outer-rect', true);
+
+        g.append('rect')
+            .attr('fill', (d,i) => 'hsl(68,'+d+'%,'+50+'%)')
+            .attr('height', d => d+'%')
+            .attr('width', barWidth-(barWidth/10))
+            .attr('transform-origin', 'center')
+            .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100 - (d))+')')
+            // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)/2+') scale(1,1)')
+            .classed('inner-rect', true);
+
+        d3.select('#random').on('click', function(){
+
+            numbers = [];
+            for(let i=0;i<101;i++){
+                numbers.push((Math.random()*100).toFixed(0))
+            }
+
+            d3.selectAll('.inner-rect').data(numbers)
+                .transition()
+                .duration(1000)
+                .attr('fill', (d,i) => 'hsl(68,'+d+'%,'+50+'%)')
+                .attr('height', d => d+'%');
+            d3.selectAll('.outer-rect').data(numbers)
+                .transition()
+                .duration(1000)
+                .attr('fill', (d,i) => 'hsl(168,'+d+'%,'+50+'%)')
+
+
+
+        });
+
+        let repeater;
+        let toggle=true;
+
+        function doWork() {
+
+            toggle = !toggle;
+
+            numbers = [];
+            for(let i=0;i<101;i++){
+                numbers.push((Math.random()*100).toFixed(0))
+            }
+
+            d3.selectAll('.inner-rect').data(numbers)
+                .transition()
+                .duration(3000)
+                .ease(d3.easeSinInOut)
+                .delay((d, i) => i*60)
+                .attr('fill', (d,i) => toggle ? 'hsl('+(360-i)/2+','+d+'%,'+50+'%)' : 'hsl('+(i)/2+','+d+'%,'+50+'%)')
+                .attr('height', d => d+'%');
+            d3.selectAll('.outer-rect').data(numbers)
+                .transition()
+                .duration(3000)
+                .ease(d3.easeSinInOut)
+                .delay((d, i) => i*100)
+                .attr('fill', (d,i) => toggle ? 'hsl('+i/2+','+d+'%,'+50+'%)' : 'hsl('+(360-i)/2+','+d+'%,'+50+'%)');
+
+
+            repeater = setTimeout(doWork, 3000);
+        }
+
+
+
+
+        d3.select('#start').on('click', function(){
+            doWork();
+        });
+
+        d3.select('#stop').on('click', function(){
+            clearTimeout(repeater);
+        });
+
+
+
+    </script>
+
+</body>
+</html>

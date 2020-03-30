@@ -11,26 +11,29 @@
 <body>
     <div id="nav-container">
         <a href="./index.html" class="nav-link">back</a>
+
+        <input type="file" id="input" style="background-color: white;"/>
+
+        <button onclick="document.getElementById('audioElement').play()">Play the Audio</button>
+        <button onclick="document.getElementById('audioElement').pause()">Pause the Audio</button>
+        <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button>
+        <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button>
+        <audio id="audioElement"></audio>
+
+
     </div>
 
-    <input type="file" id="input" style="background-color: white;"/>
-<!-- <audio id="sound" controls></audio> -->
 
 
-    <div>
-    <button onclick="document.getElementById('audioElement').play()">Play the Audio</button>
-    <button onclick="document.getElementById('audioElement').pause()">Pause the Audio</button>
-    <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button>
-    <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button>
+
+    <div id="main-container" style="width: 500px; height: 500px; margin: auto;">
+        <svg id="main-svg" viewbox="0 0 700 700" preserveAspectRatio="none"></svg>
     </div>
-
-    <!-- <audio src="" autoplay="autoplay"></audio>  -->
-    <audio id="audioElement"></audio>
 
 
 
     <script src="./d3.min.js"></script>
-    <script src="./music_visializer1_v1.3.js"></script>
+    <script src="./music_visializer1_v1.4.js"></script>
 
 </body>
 </html>
