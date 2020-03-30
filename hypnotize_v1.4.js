@@ -104,4 +104,4 @@ setInterval(()=>{
     }
     incFlag ? xOffset++ : xOffset--;
     incFlag ? yOffset++ : yOffset--;
-},100);
+},300);
