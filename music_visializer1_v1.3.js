@@ -1,5 +1,7 @@
 window.addEventListener('load', function () {
 
+    
+
     input.onchange = function(e){
         var sound = document.getElementById('audioElement');
         sound.src = URL.createObjectURL(this.files[0]);
@@ -21,7 +23,7 @@ window.addEventListener('load', function () {
 
         var frequencyData = new Uint8Array(200);
 
-        var svgHeight = '300';
+        var svgHeight = '800';
         var svgWidth = '1200';
         var barPadding = '1';
 
@@ -31,35 +33,90 @@ window.addEventListener('load', function () {
 
         var svg = createSvg('body', svgHeight, svgWidth);
 
+        let x=1
+        let y=1;
+
+        svg.on('mousemove',()=>{
+            let mouseX = event.clientX;
+            let mouseY = event.clientY;
+            let winWidth = window.innerWidth;
+            let winHeight = window.innerHeight;
+
+    
+            x = parseFloat(((mouseX/winWidth)*svgWidth).toFixed(0));
+            y = parseFloat(((mouseY/winHeight)*svgHeight).toFixed(0));
+            
+        })
+
+        
+        
+        
+
         // Create our initial D3 chart.
-        svg.selectAll('rect')
+        svg.selectAll('circle')
         .data(frequencyData)
         .enter()
-        .append('rect')
-        .attr('x', function (d, i) {
-            return i * (svgWidth / frequencyData.length);
+        .append('circle')
+        .attr('cx', (d, i) => {
+            // return (svgWidth / 2);
+            return x
         })
-        .attr('width', svgWidth / frequencyData.length - barPadding);
+        .attr('cy', (d, i) => {
+            // return i * (svgWidth / frequencyData.length);
+            return y
+        })
+        .attr('r', svgWidth);
 
         // Continuously loop and update chart with frequency data.
+        let runCount = svgWidth/2;
+        let runIncFlag = true;
+
         function renderChart() {
+
+            
+
+            if(runCount == svgWidth){
+                runIncFlag=false
+            }else if(runCount == 0){
+                runIncFlag=true
+            }
+
+
+            if(runIncFlag){
+                runCount++
+            }else{
+                runCount--
+            }
+
+            
+
+
             requestAnimationFrame(renderChart);
         
             // Copy frequency data to frequencyData array.
             analyser.getByteFrequencyData(frequencyData);
         
             // Update d3 chart with new data.
-            svg.selectAll('rect')
+            svg.selectAll('circle')
             .data(frequencyData)
-            .attr('y', function(d) {
-                return svgHeight - d;
+            .attr('cy', function(d) {
+                // return svgHeight/2;
+                return y;
             })
-            .attr('height', function(d) {
-                return d;
+            .attr('cx', function(d) {
+                // return runCount;
+                return x;
             })
-            .attr('fill', function(d) {
+            // .attr('cx', function(d) {
+            //     return svgHeight - d;
+            // })
+            .attr('r', function(d) {
+                return d*2;
+            })
+            .attr('stroke', function(d) {
                 return 'rgb(0, 0, ' + d + ')';
-            });
+            })
+            .attr('fill', 'none');
         }
         
         // Run the loop
