@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel="stylesheet" type="text/css" href="../_css_files/default_reset.css"> -->
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <title>D3</title>
+</head>
+<body>
+    <div id="nav-container">
+        <a href="./index.html" class="nav-link">back</a>
+
+        <input type="file" id="input" style="background-color: white;"/>
+
+        <button onclick="document.getElementById('audioElement').play()">Play the Audio</button>
+        <button onclick="document.getElementById('audioElement').pause()">Pause the Audio</button>
+        <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button>
+        <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button>
+        <audio id="audioElement"></audio>
+
+
+    </div>
+
+
+    <div id="main-container" style="width: 500px; height: 500px; margin: auto;">
+        <svg id="main-svg" viewbox="0 0 600 600" preserveAspectRatio="none"></svg>
+    </div>
+
+
+
+
+    <!-- <div id="main-container" style="width: 500px; height: 500px; margin: auto;">
+        <svg id="main-svg" viewbox="0 0 700 700" preserveAspectRatio="none"></svg>
+    </div> -->
+
+
+
+    <script src="./assets/js/d3.min.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+
+            let svgContainerAdjust = () =>{
+                let winWidth = window.innerWidth;
+                let winHeight = window.innerHeight;
+                if(winWidth >= winHeight){
+                    d3.select('#main-container').style('height', winHeight+'px').style('width', winHeight+'px');
+                }else{
+                    d3.select('#main-container').style('height', winWidth+'px').style('width', winWidth+'px');
+                }
+            }
+
+            svgContainerAdjust();
+
+            window.onresize = svgContainerAdjust;
+
+
+
+            input.onchange = function(e){
+                
+                var sound = document.getElementById('audioElement');
+                sound.src = URL.createObjectURL(this.files[0]);
+                // not really needed in this exact case, but since it is really important in other cases,
+                // don't forget to revoke the blobURI when you don't need it
+                sound.onend = function(e) {
+                URL.revokeObjectURL(this.src);
+                }
+
+
+                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var audioElement = document.getElementById('audioElement');
+                var audioSrc = audioCtx.createMediaElementSource(audioElement);
+                var analyser = audioCtx.createAnalyser();
+
+                // Bind our analyser to the media element source.
+                audioSrc.connect(analyser);
+                audioSrc.connect(audioCtx.destination);
+
+                var frequencyData = new Uint8Array(360);
+
+                var svgHeight = '600';
+                var svgWidth = '600';
+                var barPadding = '1';
+
+                // function createSvg(parent, height, width) {
+                //     return d3.select(parent).append('svg').attr('height', height).attr('width', width).style('border', 'solid 5px darkgray');
+                // }
+
+                var svg = d3.select('#main-svg');
+
+                let scaleValue = (num,max1,max2) => ((max2*num)/max1).toFixed(0);
+
+                let g1 = svg.selectAll()
+                    .data(frequencyData)
+                    .enter()
+                    .append("g")
+                    .classed('rect-group1', true);
+
+                let g2 = svg.selectAll()
+                    .data(frequencyData)
+                    .enter()
+                    .append("g")
+                    .style('transform-origin','50% 50%')
+                    .style('transform','rotate(180deg)')
+                    .classed('rect-group2', true);
+
+
+
+                // Create our initial D3 chart.
+                g1.append('rect')
+                .attr('x', function (d, i) {
+                    return 310;
+                })
+                .attr('y', function (d, i) {
+                    return 300;
+                })
+                // .attr('y', function (d, i) {
+                //     return i * (svgHeight / frequencyData.length);
+                // })
+                .attr('width', svgWidth / frequencyData.length)
+                .style('transform-origin',(d,i) => '50% 50%')
+                .style('transform',(d,i) => 'rotate('+scaleValue(i,frequencyData.length,360)+'deg)')
+                .classed('core-rect', true);
+
+                // Create our initial D3 chart.
+                g2.append('rect')
+                .attr('x', function (d, i) {
+                    return 290;
+                })
+                .attr('y', function (d, i) {
+                    return 0;
+                })
+                .attr('width', svgWidth / frequencyData.length)
+                .style('transform-origin',(d,i) => '50% 50%')
+                .style('transform',(d,i) => 'rotate('+scaleValue(i,frequencyData.length,360)+'deg)')
+                .classed('outer-rect', true);
+
+
+                
+
+                // Continuously loop and update chart with frequency data.
+                function renderChart() {
+
+                    requestAnimationFrame(renderChart);
+                
+                    // Copy frequency data to frequencyData array.
+                    analyser.getByteFrequencyData(frequencyData);
+                
+                    // Update d3 chart with new data.
+                    svg.selectAll('.core-rect')
+                    .data(frequencyData)
+                    // .attr('x', function(d) {
+                    //     return d;
+                    // })
+                    // .attr('y', function(d) {
+                    //     return d;
+                    // })
+                    .attr('height', function(d) {
+                        return d;
+                    })
+                    .attr('fill', function(d,i) {
+                        
+                        // return 'hsl('+scaleValue(i,frequencyData.length,359)+' '+scaleValue(d,255,100)+'% '+scaleValue(d,255,100)+'%)';
+                        return 'hsl('+scaleValue(i,frequencyData.length,359)+' '+scaleValue(d,255,100)+'% 50%)';
+                    });
+                    // .attr('x',(d,i) => i);
+                
+                    // Update d3 chart with new data.
+                    svg.selectAll('.outer-rect')
+                    .data(frequencyData)
+                    .attr('height', function(d) {
+                        return 255-d;
+                    })
+                    .attr('fill', function(d,i) {
+                        
+                        // return 'hsl('+scaleValue(i,frequencyData.length,359)+' '+scaleValue(d,255,100)+'% '+scaleValue(d,255,100)+'%)';
+                        return 'hsl('+(359-scaleValue(i,frequencyData.length,359))+' 50% '+scaleValue(d,255,100)+'%)';
+                    });
+                }
+                
+                // Run the loop
+                renderChart();
+
+
+            }
+
+
+        })
+    </script>
+
+</body>
+</html>

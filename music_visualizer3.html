@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel="stylesheet" type="text/css" href="../_css_files/default_reset.css"> -->
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <title>D3</title>
+</head>
+<body>
+    <div id="nav-container">
+        <a href="./index.html" class="nav-link">back</a>
+
+        <input type="file" id="input" style="background-color: white;"/>
+
+        <button id='play-btn' onclick="document.getElementById('audioElement').play()">Play the Audio</button>
+        <button id='pause-btn' onclick="document.getElementById('audioElement').pause()">Pause the Audio</button>
+        <!-- <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button> -->
+        <!-- <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button> -->
+        <audio id="audioElement"></audio>
+
+
+    </div>
+
+    
+    
+    <div id="svgBox" style="width: 100%; height: 80vh">
+        <svg id="mainSVG" height="100%" width="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="background-color: black"></svg>
+    </div>
+    <!-- <button id="random">RANDOM!</button> -->
+    <!-- <button id="start">START!</button> -->
+    <!-- <button id="stop">STOP!</button> -->
+
+
+
+
+    <!-- <div id="main-container" style="width: 500px; height: 500px; margin: auto;">
+        <svg id="main-svg" viewbox="0 0 700 700" preserveAspectRatio="none"></svg>
+    </div> -->
+
+
+
+    <script src="./assets/js/d3.min.js"></script>
+    <script>
+        
+
+        window.addEventListener('load', function () {
+
+            let scaleValue = (num,max1,max2) => ((max2*num)/max1).toFixed(0);
+
+
+
+            input.onchange = function(e){
+                var sound = document.getElementById('audioElement');
+                sound.src = URL.createObjectURL(this.files[0]);
+                // not really needed in this exact case, but since it is really important in other cases,
+                // don't forget to revoke the blobURI when you don't need it
+                sound.onend = function(e) {
+                    URL.revokeObjectURL(this.src);
+                }
+
+
+                var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var audioElement = document.getElementById('audioElement');
+                var audioSrc = audioCtx.createMediaElementSource(audioElement);
+                var analyser = audioCtx.createAnalyser();
+
+                // Bind our analyser to the media element source.
+                audioSrc.connect(analyser);
+                audioSrc.connect(audioCtx.destination);
+
+                var frequencyData = new Uint8Array(150);
+
+                // let dataLen = frequencyData.length;
+
+
+
+
+
+                // let numbers = [];
+                // for(let i=0;i<101;i++){
+                //     numbers.push((Math.random()*100).toFixed(0))
+                // }
+
+
+
+
+                const svg = d3.select('#mainSVG');
+
+                let g = svg.selectAll()
+                    .data(frequencyData)
+                    .enter()
+                    .append("g")
+                    .classed('rect-group', true);
+
+                let barWidth = 100/frequencyData.length;
+
+                g.append('rect')
+                    .attr('fill', (d,i) => 'hsl(168,'+d+'%,'+50+'%)')
+                    .attr('height', '100%')
+                    .attr('width', barWidth)
+                    // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)+')');
+                    .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
+                    .classed('bg-rect', true);
+
+                g.append('rect')
+                    .attr('fill', (d,i) => 'hsl(68,'+d+'%,'+50+'%)')
+                    .attr('height', d => scaleValue(d,255,100)+'%')
+                    .attr('width', barWidth-(barWidth/10))
+                    .attr('transform-origin', 'center')
+                    .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
+                    // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)/2+') scale(1,1)')
+                    .classed('top-rect', true);
+
+                g.append('rect')
+                    .attr('fill', (d,i) => 'hsl(68,'+d+'%,'+50+'%)')
+                    .attr('height', d => scaleValue(d,255,100)+'%')
+                    .attr('width', barWidth-(barWidth/10))
+                    .attr('transform-origin', 'center')
+                    .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
+                    // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)/2+') scale(1,1)')
+                    .classed('mid-rect', true);
+
+                g.append('rect')
+                    .attr('fill', (d,i) => 'hsl(68,'+d+'%,'+50+'%)')
+                    .attr('height', d => scaleValue(d,255,100)+'%')
+                    .attr('width', barWidth-(barWidth/10))
+                    .attr('transform-origin', 'center')
+                    .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
+                    // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)/2+') scale(1,1)')
+                    .classed('bottom-rect', true);
+
+                
+
+                let repeater;
+                let toggle=true;
+
+                let inc = 0;
+                let colSwitchArr = [];
+
+                let colorFlipper = () => {
+
+                    if(toggle){
+                        if(inc<frequencyData.length){
+                            colSwitchArr.push(inc);
+                            inc++
+                        }else{
+                            toggle=false;
+                        }
+                    }else{
+                        if(colSwitchArr.length === 0){
+                            inc=0;
+                            toggle=true;
+                        }else{
+                            colSwitchArr.shift();
+                        }
+
+                    }
+
+
+
+                    // let randNum = Math.floor(Math.random() * frequencyData.length);
+                    // if(toggle){
+                    //     let randIndex = colSwitchArr.indexOf(randNum);
+                    //     if(randIndex > -1){
+                    //         colSwitchArr.splice(randIndex,1)
+                    //     }
+                    // }else{
+                    //     colSwitchArr.push(randNum)
+                    // }
+
+                    let timeInt = 5000/frequencyData.length
+
+                    repeater = setTimeout(colorFlipper, timeInt);
+
+                    // array.includes();
+                }
+                d3.select('#play-btn').on('click',() =>{
+                    colorFlipper();
+                })
+                d3.select('#pause-btn').on('click',() =>{
+                    clearTimeout(repeater);
+                })
+
+
+
+
+                function doWork() {
+
+
+                    requestAnimationFrame(doWork);
+
+                    // Copy frequency data to frequencyData array.
+                    analyser.getByteFrequencyData(frequencyData);
+
+
+                    d3.selectAll('.top-rect').data(frequencyData)
+                        .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
+                        .attr('fill', (d,i) => {
+                            if(colSwitchArr.includes(i)){
+                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                            }else{
+                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                            }
+                        })
+                        .attr('height', d => (20-(scaleValue(d,255,20))+'%'));
+
+                    d3.selectAll('.mid-rect').data(frequencyData)
+                        .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-(scaleValue(d,255,80)))/2+')')
+                        .attr('fill', (d,i) => {
+                            if(colSwitchArr.includes(i)){
+                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                            }else{
+                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                            }
+                        })
+                        .attr('height', d => scaleValue(d,255,80)+'%')
+                        .attr('width', d => {
+                            if(d>200){
+                                return 0.9
+                            }else if(d>100){
+                                return 0.6
+                            }else{
+                                return 0.3
+                            }
+                        });
+
+                    d3.selectAll('.bottom-rect').data(frequencyData)
+                        .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-(20-(scaleValue(d,255,20))))+')')
+                        .attr('fill', (d,i) => {
+                            if(colSwitchArr.includes(i)){
+                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                            }else{
+                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                            }
+                        })
+                        .attr('height', d => (20-(scaleValue(d,255,20))+'%'));
+
+                    d3.selectAll('.bg-rect').data(frequencyData)
+                        .attr('fill', (d,i) => {
+                            if(colSwitchArr.includes(i)){
+                                return 'hsl('+i/2+','+50+'%,'+scaleValue(d,255,80)+'%)'
+                            }else{
+                                return 'hsl('+(360-i)/2+','+50+'%,'+scaleValue(d,255,80)+'%)'
+                            }
+                        })
+                        
+                        
+                        
+                }
+                doWork()
+
+            }
+
+        })
+
+
+
+
+
+    </script>
+
+</body>
+</html>

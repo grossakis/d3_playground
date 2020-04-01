@@ -1,0 +1,31 @@
+body{
+    /* background-color: black; */
+    background-color: black;
+    touch-action: none;
+    
+}
+.nav-link{
+    display: inline-block;
+    background-color: white;
+    color: black;
+    padding: 3px;
+    margin: 3px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+.nav-link:focus, .nav-link:visited{
+    text-decoration: none;
+    color: black;
+}
+#nav-container{
+    height: 4vh;
+}
+
+#main-container{
+    width: 100vw;
+    height: 95vh;
+} 
+#main-svg{
+    width: 100%;
+    height: 99%;
+}
