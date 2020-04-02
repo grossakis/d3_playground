@@ -14,8 +14,8 @@
 
         <input type="file" id="input" style="background-color: white;"/>
 
-        <button onclick="document.getElementById('audioElement').play()">Play the Audio</button>
-        <button onclick="document.getElementById('audioElement').pause()">Pause the Audio</button>
+        <button id="play-btn" onclick="document.getElementById('audioElement').play()">Play the Audio</button>
+        <button id="pause-btn" onclick="document.getElementById('audioElement').pause()">Pause the Audio</button>
         <button onclick="document.getElementById('audioElement').volume+=0.1">Increase Volume</button>
         <button onclick="document.getElementById('audioElement').volume-=0.1">Decrease Volume</button>
         <audio id="audioElement"></audio>
@@ -91,10 +91,12 @@
 
                 let scaleValue = (num,max1,max2) => ((max2*num)/max1).toFixed(0);
 
-                let g1 = svg.selectAll()
+                let g1 = svg
+                .selectAll()
                     .data(frequencyData)
                     .enter()
                     .append("g")
+                    .style('transform-origin','50% 50%')
                     .classed('rect-group1', true);
 
                 let g2 = svg.selectAll()
@@ -105,10 +107,12 @@
                     .style('transform','rotate(180deg)')
                     .classed('rect-group2', true);
 
+                // let gg = svg.append('g').classed('gg',true).append('.rect-group1');
+
 
 
                 // Create our initial D3 chart.
-                g1.append('rect')
+                g2.append('rect')
                 .attr('x', function (d, i) {
                     return 310;
                 })
@@ -124,17 +128,63 @@
                 .classed('core-rect', true);
 
                 // Create our initial D3 chart.
-                g2.append('rect')
+                g1.append('rect')
                 .attr('x', function (d, i) {
                     return 290;
                 })
                 .attr('y', function (d, i) {
-                    return 0;
+                    return -400;
                 })
                 .attr('width', svgWidth / frequencyData.length)
+                .attr('height', 1000)
                 .style('transform-origin',(d,i) => '50% 50%')
                 .style('transform',(d,i) => 'rotate('+scaleValue(i,frequencyData.length,360)+'deg)')
                 .classed('outer-rect', true);
+
+
+
+
+                let repeater;
+                let bgColRef = 150;
+                let colBgDirToggle = true;
+
+                let bgRotRef = 180;
+                // let rotBgToggle = true;
+
+
+                let colorFlipper = () => {
+
+                    if(colBgDirToggle){
+                        bgColRef++
+                    }else{
+                        bgColRef--
+                    }
+
+                    if(bgColRef === 220){
+                        colBgDirToggle =false;
+                        
+                    }else if(bgColRef === 150){
+                        colBgDirToggle = true
+
+                    }
+
+
+                    bgRotRef++
+
+                    if(bgRotRef === 360){
+                        bgRotRef = 0;
+                        
+                    }
+                    // console.log(bgColRef)
+
+                    repeater = setTimeout(colorFlipper, 100);
+                }
+                d3.select('#play-btn').on('click',() =>{
+                    colorFlipper();
+                })
+                d3.select('#pause-btn').on('click',() =>{
+                    clearTimeout(repeater);
+                })
 
 
                 
@@ -169,14 +219,21 @@
                     // Update d3 chart with new data.
                     svg.selectAll('.outer-rect')
                     .data(frequencyData)
-                    .attr('height', function(d) {
-                        return 255-d;
-                    })
+                    // .attr('height', function(d) {
+                    //     return 3.5*(255-d);
+                    // })
                     .attr('fill', function(d,i) {
                         
                         // return 'hsl('+scaleValue(i,frequencyData.length,359)+' '+scaleValue(d,255,100)+'% '+scaleValue(d,255,100)+'%)';
-                        return 'hsl('+(359-scaleValue(i,frequencyData.length,359))+' 50% '+scaleValue(d,255,100)+'%)';
+                        let lightLimit = 80
+                        if(scaleValue(d,255,100) < lightLimit){
+                            lightLimit = scaleValue(d,255,100);
+                        }
+                        return 'hsl('+(359-scaleValue(i,frequencyData.length,359))+' '+scaleValue(d,255,100)+'% '+lightLimit+'%)';
                     });
+
+                    svg.style('background-color', ()=> 'hsl('+bgColRef+' '+50+'% '+50+'%)')
+                    g1.style('transform',()=>'rotate('+bgRotRef+'deg)');
                 }
                 
                 // Run the loop

@@ -131,7 +131,17 @@
                     // .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-d)/2+') scale(1,1)')
                     .classed('bottom-rect', true);
 
-                
+
+                // --CURRENTLY UNUSED-- Generates fibinacci sequence based on length of frequency datta array
+                let fibArr = [0,1]
+                let fibNum=0;
+                while(fibNum < frequencyData.length){
+                    let lastArrInd = fibArr.length-1;
+                    fibArr.push((fibArr[lastArrInd-1]+fibArr[lastArrInd]))
+                    fibNum = fibArr[fibArr.length-1];
+                }
+
+                console.log(fibArr)
 
                 let repeater;
                 let toggle=true;
@@ -177,6 +187,7 @@
                     // array.includes();
                 }
                 d3.select('#play-btn').on('click',() =>{
+                    clearTimeout(repeater);
                     colorFlipper();
                 })
                 d3.select('#pause-btn').on('click',() =>{
@@ -198,10 +209,17 @@
                     d3.selectAll('.top-rect').data(frequencyData)
                         .attr('transform', (d,i) => 'translate('+ i * barWidth+', 0)')
                         .attr('fill', (d,i) => {
+                            let lightness = 50;
+                            // if(i>0 && d>=frequencyData[i-1] && d>=frequencyData[i+1]){
+                            //     lightness = 75
+                            // }else if(i>0 && d<frequencyData[i-1] && d<frequencyData[i+1]){
+                            //     lightness = 40
+
+                            // }
                             if(colSwitchArr.includes(i)){
-                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+lightness+'%)'
                             }else{
-                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+lightness+'%)'
                             }
                         })
                         .attr('height', d => (20-(scaleValue(d,255,20))+'%'));
@@ -209,10 +227,18 @@
                     d3.selectAll('.mid-rect').data(frequencyData)
                         .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-(scaleValue(d,255,80)))/2+')')
                         .attr('fill', (d,i) => {
+                            let lightness = 50;
+                            if(i>0 && d>=frequencyData[i-1] && d>=frequencyData[i+1]){
+                                lightness = 55
+                            }
+                            // else if(i>0 && d<frequencyData[i-1] && d<frequencyData[i+1]){
+                            //     lightness = 45
+
+                            // }
                             if(colSwitchArr.includes(i)){
-                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+lightness+'%)'
                             }else{
-                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+lightness+'%)'
                             }
                         })
                         .attr('height', d => scaleValue(d,255,80)+'%')
@@ -229,20 +255,34 @@
                     d3.selectAll('.bottom-rect').data(frequencyData)
                         .attr('transform', (d,i) => 'translate('+ i * barWidth+', '+(100-(20-(scaleValue(d,255,20))))+')')
                         .attr('fill', (d,i) => {
+                            let lightness = 50;
+                            // if(i>0 && d>=frequencyData[i-1] && d>=frequencyData[i+1]){
+                            //     lightness = 75
+                            // }else if(i>0 && d<frequencyData[i-1] && d<frequencyData[i+1]){
+                            //     lightness = 40
+
+                            // }
                             if(colSwitchArr.includes(i)){
-                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                                return 'hsl('+(360-i)/2+','+scaleValue(d,255,100)+'%,'+lightness+'%)'
                             }else{
-                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+50+'%)'
+                                return 'hsl('+(i/2)+','+scaleValue(d,255,100)+'%,'+lightness+'%)'
                             }
                         })
                         .attr('height', d => (20-(scaleValue(d,255,20))+'%'));
 
                     d3.selectAll('.bg-rect').data(frequencyData)
                         .attr('fill', (d,i) => {
+                            let lightness = 50;
+                            if(i>0 && d>=frequencyData[i-1] && d>=frequencyData[i+1]){
+                                lightness = 60
+                            }else if(i>0 && d<frequencyData[i-1] && d<frequencyData[i+1]){
+                                lightness = 45
+
+                            }
                             if(colSwitchArr.includes(i)){
-                                return 'hsl('+i/2+','+50+'%,'+scaleValue(d,255,80)+'%)'
+                                return 'hsl('+i/2+','+lightness+'%,'+scaleValue(d,255,80)+'%)'
                             }else{
-                                return 'hsl('+(360-i)/2+','+50+'%,'+scaleValue(d,255,80)+'%)'
+                                return 'hsl('+(360-i)/2+','+lightness+'%,'+scaleValue(d,255,80)+'%)'
                             }
                         })
                         
