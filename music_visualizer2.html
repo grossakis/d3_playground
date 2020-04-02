@@ -180,6 +180,7 @@
                     repeater = setTimeout(colorFlipper, 100);
                 }
                 d3.select('#play-btn').on('click',() =>{
+                    clearTimeout(repeater);
                     colorFlipper();
                 })
                 d3.select('#pause-btn').on('click',() =>{
