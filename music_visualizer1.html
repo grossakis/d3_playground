@@ -72,7 +72,7 @@
                 audioSrc.connect(analyser);
                 audioSrc.connect(audioCtx.destination);
 
-                var frequencyData = new Uint8Array(100);
+                var frequencyData = new Uint8Array(75);
 
                 // var svgHeight = '800';
                 // var svgWidth = '1200';
@@ -122,12 +122,48 @@
                     // return i * (svgWidth / frequencyData.length);
                     return y
                 })
-                .attr('r', 0);
+                .attr('r', 0)
+                // .attr("pathLength", 100) 
+                // .attr("stroke-dasharray", '10 10')
+                // .style('transform-origin','50% 50%')
+                // .style('transform',(d,i) => (i%2 === 0) ? 'rotate(36deg)' : '')
                 // .attr('fill', (d, i) => 'rgb(0, 0, ' + d + ')');
 
                 // Continuously loop and update chart with frequency data.
                 // let runCount = svgWidth/2;
                 // let runIncFlag = true;
+
+                let scaleValue = (num,max1,max2) => ((max2*num)/max1).toFixed(0);
+
+                let flareFlag = true;
+
+                let circleFlare = () => {
+
+                    flareFlag=false;
+                    mSvg.append('circle')
+                        .style('fill','transparent')
+                        .style('stroke','white')
+                        .style('stroke-width',20)
+                        .style('opacity',0)
+                        .attr('cx',x)
+                        .attr('cy',y)
+                        .attr('r',100)
+                        .transition()
+                        .duration(5000)
+                        .attr('r', 600)
+                        .style('stroke-width',60)
+                        .style('opacity',0.7)
+                        .remove()
+                        // .on("end", () => {
+                        //     flareFlag=true;
+                        // });
+
+                    setTimeout(() => {
+                        flareFlag=true
+                    },3000)
+
+                }
+
 
                 function renderChart() {
 
@@ -166,20 +202,49 @@
                     //     return x;
                     // })
                     .attr('r', function(d) {
+                        if(d>254){
+                            if(flareFlag){    
+                                circleFlare();
+                            }
+                        }
                         return d;
                     })
-                    .attr('fill', (d, i) => 'rgb(0, ' + d + ', 0)')
-                    // .attr('fill', (d, i) => 'hsl(0, 0, 0)')
-                    .attr('stroke', function(d) {
-                        return 'rgb(0, 0, ' + d + ')';
-                    });
-                    // .attr('stroke', function(d) {
+                    // .attr('fill', (d, i) => 'rgb(0, ' + d + ', 0)')
+                    .attr('fill', (d, i) => {
+                        if(i%2===0){
+                            return 'hsl(185, ' + scaleValue(d,255,100) + '%, '+scaleValue(d,255,50)+'%)'
+                        }else{
+                            return 'hsl(170, ' + scaleValue(d,255,100) + '%, '+scaleValue(d,255,50)+'%)'
+                        }
+                    })
+                    .attr('stroke', function(d, i) {
+
+                        if(i%2===0){
+                            return 'hsl(185, ' + scaleValue(d,255,50) + '%, '+scaleValue(d,255,25)+'%)'
+                        }else{
+                            return 'hsl(170, ' + scaleValue(d,255,50) + '%, '+scaleValue(d,255,25)+'%)'
+                        }
+
+
+                        // if(i%2===0){
+                        //     return 'hsl(60, ' + 75 + '%, '+20+'%)'
+                        // }else{
+                        //     return 'hsl(50, ' + 75 + '%, '+20+'%)'
+                        // }
+                    })
+                    .style('stroke-width', (d,i) => scaleValue(d,255,5))
+
+                    
+                    // .attr('stroke', function(d, i) {
                     //     return 'rgb(0, 0, ' + d + ')';
                     // });
                 }
                 
                 // Run the loop
                 renderChart();
+
+                
+
 
 
             }
