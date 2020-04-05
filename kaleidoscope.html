@@ -23,6 +23,15 @@
 
 
         <div class="colorPicker"></div>
+        <div style="color: white;">
+            <p>"space" = rotate</p>
+            <p>"h" = highlight active section</p>
+            <p>"c" = circle</p>
+            <p>"s" = square</p>
+            <p>"x" = toggle fill</p>
+            <p>"up arrow" = increase size</p>
+            <p>"down arrow" = decrease size</p>
+        </div>
 
 
     </div>
@@ -60,7 +69,7 @@
         });
 
 
-        d3.select('#shape-add-preview').style('pointer-events','none')
+        d3.select('#shape-add-preview').style('pointer-events','none').style('opacity', 0.7)
 
 
         let selectedColor = 'maroon'
@@ -256,106 +265,123 @@
             })
 
             // Declare variable for shape type to add new pieces
+            let solidToggle = true;
             let addType = 'circle';
-
-            // Click function for adding new shapes
-            d3.select('#main-svg').on("click", function(d,i,n) {
-
-                    d3.selectAll('.shapes').each((dx,ix,nx)=>{
-
-                        if(addType === 'circle'){
-
-                            d3.select(nx[ix]).append('circle')
-                            .attr('cx', () => {
-                                if(addFlag){
-                                    return d3.mouse(nx[0])[0]
-                                }else{
-                                    // console.log(d3.mouse(nx[ix])[0])
-                                    return d3.mouse(nx[ix])[0]
-                                }
-                            })
-                            .attr('cy', () => {
-                                if(addFlag){
-                                    return d3.mouse(nx[0])[1]
+            let sizeVar = 50
 
 
-                                }else{
-                                    return d3.mouse(nx[ix])[1]
-                                }
-                            })
-                            .attr('r', 75)
-                            .style('fill', 'transparent')
-                            .style('stroke',selectedColor)
-                            .attr('stroke-width', 15)
-                            
-
-                        }else if(addType === 'rect'){
-
-                            d3.select(nx[ix]).append('rect')
-                            .attr('x', () => {
-                                if(addFlag){
-                                    return d3.mouse(nx[0])[0]-25
-
-
-                                }else{
-                                    return d3.mouse(nx[ix])[0]-25
-                                }
-                            })
-                            .attr('y', () => {
-                                if(addFlag){
-                                    return d3.mouse(nx[0])[1]-25
-
-
-                                }else{
-                                    return d3.mouse(nx[ix])[1]-25
-                                }
-                            })
-                            .attr('transform-origin', (d3.mouse(nx[0])[0])+' '+(d3.mouse(nx[0])[1]))
-                            .attr('height', 50)
-                            .attr('width', 50)
-                            .style('transform', 'rotate('+(-rotNum)+'deg)')
-                            .style('fill', selectedColor)
-
-                        }
-
-                    })
-            })
-
-
-            d3.select('#main-svg').on("mouseenter", function(d,i,n) {
-
-                d3.select("#shape-add-preview").style('display', 'inline');
-
-                let mouseX = d3.mouse(n[i])[0];
-                let mouseY = d3.mouse(n[i])[1];
-
+            let shapeHolderChange = () => {
                 if(addType === 'circle'){
 
-                    d3.select('#shape-add-preview')
-                        .attr('transform','translate('+mouseX+' '+mouseY+')')
-                        .attr('transform-origin', '500 500')
-                        .append('circle')
-                        .attr('cx', (0))
-                        .attr('cy', (0))
-                        .attr('r', 75)
-                        .style('fill', 'transparent')
-                        .style('stroke',selectedColor)
-                        .attr('stroke-width', 15)
+                d3.select('#shape-add-preview')
+                    // .attr('transform','translate('+mouseX+' '+mouseY+')')
+                    .attr('transform-origin', '500 500')
+                    .append('circle')
+                    .attr('cx', (0))
+                    .attr('cy', (0))
+                    .attr('r', sizeVar)
+                    .style('fill', () => solidToggle ? selectedColor : 'transparent')
+                    .style('stroke',selectedColor)
+                    .attr('stroke-width', 15)
 
                 }else if(addType === 'rect'){
 
 
                     d3.select('#shape-add-preview')
-                        .attr('transform','translate('+mouseX+' '+mouseY+')')
+                        // .attr('transform','translate('+mouseX+' '+mouseY+')')
                         .attr('transform-origin', '500 500')
                         .append('rect')
-                        .attr('x', (0)-25)
-                        .attr('y', (0)-25)
-                        .attr('height', 50)
-                        .attr('width', 50)
-                        .style('fill', selectedColor)
+                        .attr('x', -(sizeVar/2))
+                        .attr('y', -(sizeVar/2))
+                        .attr('height', sizeVar)
+                        .attr('width', sizeVar)
+                        // .style('fill', selectedColor)
+                        .style('fill', () => solidToggle ? selectedColor : 'transparent')
+                        .style('stroke',selectedColor)
+                        .attr('stroke-width', 15)
+
 
                 }
+                
+            }
+
+            // Click function for adding new shapes
+            d3.select('#main-svg').on("click", function(d,i,n) {
+
+                d3.selectAll('.shapes').each((dx,ix,nx)=>{
+
+                    if(addType === 'circle'){
+
+                        d3.select(nx[ix]).append('circle')
+                        .attr('cx', () => {
+                            if(addFlag){
+                                return d3.mouse(nx[0])[0]
+                            }else{
+                                // console.log(d3.mouse(nx[ix])[0])
+                                return d3.mouse(nx[ix])[0]
+                            }
+                        })
+                        .attr('cy', () => {
+                            if(addFlag){
+                                return d3.mouse(nx[0])[1]
+
+
+                            }else{
+                                return d3.mouse(nx[ix])[1]
+                            }
+                        })
+                        .attr('r', sizeVar)
+                        .style('fill', 'transparent')
+                        .style('fill', () => solidToggle ? selectedColor : 'transparent')
+                        .style('stroke',selectedColor)
+                        .attr('stroke-width', 15)
+                        
+
+                    }else if(addType === 'rect'){
+
+                        d3.select(nx[ix]).append('rect')
+                        .attr('x', () => {
+                            if(addFlag){
+                                return d3.mouse(nx[0])[0]-(sizeVar/2)
+
+
+                            }else{
+                                return d3.mouse(nx[ix])[0]-(sizeVar/2)
+                            }
+                        })
+                        .attr('y', () => {
+                            if(addFlag){
+                                return d3.mouse(nx[0])[1]-(sizeVar/2)
+
+
+                            }else{
+                                return d3.mouse(nx[ix])[1]-(sizeVar/2)
+                            }
+                        })
+                        .attr('transform-origin', (d3.mouse(nx[0])[0])+' '+(d3.mouse(nx[0])[1]))
+                        .attr('height', sizeVar)
+                        .attr('width', sizeVar)
+                        .style('transform', 'rotate('+(-rotNum)+'deg)')
+                        .style('fill', () => solidToggle ? selectedColor : 'transparent')
+                        .style('stroke',selectedColor)
+                        .attr('stroke-width', 15)
+
+                    }
+
+                })
+            })
+
+            // Function for when mouse is over SVG
+            d3.select('#main-svg').on("mouseenter", function(d,i,n) {
+
+                let mouseX = d3.mouse(n[i])[0];
+                let mouseY = d3.mouse(n[i])[1];
+
+                d3.select("#shape-add-preview")
+                    .style('display', 'inline')
+                    .attr('transform','translate('+mouseX+' '+mouseY+')');
+
+                shapeHolderChange();
 
             })
 
@@ -376,41 +402,85 @@
 
             // Changes clip path / mask rotation
             d3.select('#rotation-toggle').on("change", function(d,i,n) {
-                
 
                 rotNum = d3.select(n[i]).property('value');
                 
                 d3.selectAll('.shapes').attr('transform','rotate('+(rotNum)+')');
-                // d3.select('#pie-slice-clip').attr('transform','rotate('+(rotNum)+')');
-                // d3.select('#pie-slice-clip').select('path').attr('transform','rotate('+rotNum+')');
-
 
             })
 
             // Toggles vibility of active section highlight
-            d3.select('#highlight-toggle').on("change", function(d,i,n) {
+            // d3.select('#highlight-toggle').on("change", function(d,i,n) {
 
-                if(!d3.select(n[i]).property('checked')){
+            //     if(!d3.select(n[i]).property('checked')){
 
-                    d3.select('#highlight-path')
-                        .style('display','none')
-                }else{
-                    d3.select('#highlight-path')
-                        .style('display','inline')
-                }
+            //         d3.select('#highlight-path')
+            //             .style('display','none')
+            //     }else{
+            //         d3.select('#highlight-path')
+            //             .style('display','inline')
+            //     }
                 
 
-            })
+            // })
 
 
+            let rotater;
+            let rFlag = true;
+
+            let startRotate = ()=>{
+                rFlag = !rFlag;
+                rotater = setInterval(()=>{
+
+                    rotNum++
+
+                    d3.selectAll('.shapes').attr('transform','rotate('+(rotNum)+')');
+
+
+                },50);
+            }
+            
+
+
+            let highlightFlag = false;
 
             document.addEventListener('keydown', function(event) {
                 console.log(event.key)
 
-                if(event.key === 'c'){
+                if(event.key === 'h'){
+
+                    highlightFlag = !highlightFlag;
+
+                    if(highlightFlag){
+                        d3.select('#highlight-path')
+                            .style('display','inline')
+                    }else{
+                        d3.select('#highlight-path')
+                            .style('display','none')
+                    }
+
+                }else if(event.key === 'c'){
                     addType = 'circle'
-                }else if(event.key === 'r'){
+                }else if(event.key === 's'){
                     addType = 'rect'
+                }else if(event.key === 'x'){
+                    solidToggle = !solidToggle;
+                }else if(event.key === 'ArrowUp'){
+                    if(sizeVar <500){
+                        sizeVar +=3
+                    }
+                }else if(event.key === 'ArrowDown'){
+                    if(sizeVar >3){
+                        sizeVar-=3
+                    }
+                }else if(event.key === ' '){
+
+                    if(rFlag){
+                        startRotate();
+                    }else{
+                        rFlag = !rFlag;
+                        clearInterval(rotater);
+                    }
                 }
                 // if (event.code == 'KeyZ' && (event.ctrlKey || event.metaKey)) {
                 //     alert('Undo!')
@@ -418,36 +488,7 @@
 
                 d3.select("#shape-add-preview").selectAll("*").remove();
 
-                // let mouseX = d3.mouse(n[i])[0];
-                // let mouseY = d3.mouse(n[i])[1];
-
-                if(addType === 'circle'){
-
-                    d3.select('#shape-add-preview')
-                        // .attr('transform','translate('+mouseX+' '+mouseY+')')
-                        .attr('transform-origin', '500 500')
-                        .append('circle')
-                        .attr('cx', (0))
-                        .attr('cy', (0))
-                        .attr('r', 75)
-                        .style('fill', 'transparent')
-                        .style('stroke',selectedColor)
-                        .attr('stroke-width', 15)
-
-                }else if(addType === 'rect'){
-
-
-                    d3.select('#shape-add-preview')
-                        // .attr('transform','translate('+mouseX+' '+mouseY+')')
-                        .attr('transform-origin', '500 500')
-                        .append('rect')
-                        .attr('x', (0)-25)
-                        .attr('y', (0)-25)
-                        .attr('height', 50)
-                        .attr('width', 50)
-                        .style('fill', selectedColor)
-
-                }
+                shapeHolderChange();
 
             });
 
