@@ -12,19 +12,20 @@
     <div id="nav-container">
         <a href="./index.html" class="nav-link">back</a>
 
-        <button id="remove-btn">HIDE REFLECTIONS</button>
-        <button id="add-btn" disabled>SHOW REFLECTIONS</button>
+        <!-- <button id="remove-btn">HIDE REFLECTIONS</button> -->
+        <!-- <button id="add-btn" disabled>SHOW REFLECTIONS</button> -->
 
-        <input id="highlight-toggle" type="checkbox"/>
+        <!-- <input id="highlight-toggle" type="checkbox"/>
         <label for="highlight-toggle" style="color: white;">SHOW ACTIVE SECTION</label>
 
         <input id="rotation-toggle" type="number"/>
-        <label for="rotation-toggle" style="color: white;">SPIN KALEIDOSCOPE</label>
+        <label for="rotation-toggle" style="color: white;">SPIN KALEIDOSCOPE</label> -->
 
 
         <div class="colorPicker"></div>
         <div style="color: white;">
             <p>"space" = rotate</p>
+            <p>"t" = toggle reflections</p>
             <p>"h" = highlight active section</p>
             <p>"c" = circle</p>
             <p>"s" = square</p>
@@ -439,6 +440,8 @@
 
                 },50);
             }
+
+
             
 
 
@@ -447,7 +450,27 @@
             document.addEventListener('keydown', function(event) {
                 console.log(event.key)
 
-                if(event.key === 'h'){
+                if(event.key === 't'){
+                    
+                    if(addFlag){
+                        
+                        d3.select('#pie-slice-clip').style('display', 'none');
+                        d3.selectAll('.clone')
+                        .each((dx,ix,nx)=>{
+                            d3.select(nx[ix]).remove();
+                        })
+
+                    }else{
+                    
+                        d3.select('#pie-slice-clip').style('display', 'inline');
+                        kaleidoGen('.main-slice');
+
+                    }
+
+                    addFlag = !addFlag;
+
+
+                }else if(event.key === 'h'){
 
                     highlightFlag = !highlightFlag;
 
