@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel="stylesheet" type="text/css" href="../_css_files/default_reset.css"> -->
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
+    <title>D3</title>
+
+
+    <style>
+        #main-svg{
+            transform: scaleY(-1);
+        }
+        rect{
+            fill: #A0ACAD;
+            transition: all 0.2s ease-in-out;
+        }
+        rect.selected{
+            fill: #97D8B2;
+        }
+    </style>
+
+
+</head>
+<body>
+    <div id="nav-container">
+        <a href="./index.html" class="nav-link">back</a>
+    </div>
+
+    
+
+    <!-- <button id="start-button">START!</button> -->
+    <!-- <button id="stop-button">stop!</button> -->
+    <!-- <label for="freequency-input" style="color: aquamarine;">Frequency</label> -->
+    <!-- <input id="frequency-input" type="number" value=440 /> -->
+    <select id="key-select" hidden>
+        <option value="C" selected>C</option>
+        <option value="C#">C#</option>
+        <option value="D">D</option>
+        <option value="Eb">Eb</option>
+        <option value="F">F</option>
+        <option value="F#">F#</option>
+        <option value="G">G</option>
+        <option value="G#">G#</option>
+        <option value="A">A</option>
+        <option value="Bb">Bb</option>
+        <option value="B">B</option>
+    </select>
+    <select id="octave-select">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4" selected>4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <!-- <option value="10">10</option> -->
+    </select>
+    <select id="scale-select"></select>
+    <button id="sequence-gen-btn" type="button">GENERATE CHECKS</button>
+
+
+
+
+    <!-- <canvas id="canvas"></canvas> -->
+
+    <div id="main-container" style="width: 80vw; height: 500px; margin: auto;" >
+
+        
+        <svg id="main-svg" width="1000" height="1000" viewbox="0 0 1000 1000" preserveAspectRatio="none">
+
+        </svg>
+        <!-- <div class="checkgroup">
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+            <input type="checkbox" />
+        </div> -->
+        <button id="tone1">play1</button>
+        <button id="tone2">stop</button>
+        <!-- <svg width="300" height="300"> </svg> -->
+    </div>
+
+
+
+    <script src="./assets/js/d3.min.js"></script>
+    <script src="./assets/js/tonal.min.js"></script>
+    <script src="./assets/js/tone.js"></script>
+    <script>
+
+        const scaleValue = (num,max1,max2) => ((max2*num)/max1).toFixed(2);
+
+        const fillRange = (start, end) => {
+        return Array(end - start + 1).fill().map((item, index) => start + index);
+        };
+        let timeSeg = fillRange(1, 16);
+        let scaleLen = fillRange(1, 5);
+        // console.log(timeSeg)
+
+
+
+        let mSvg = d3.select('#main-svg');
+
+        
+
+        // populates SVG with background rectangles
+        mSvg.selectAll()
+            .data(timeSeg)
+            .enter()
+            // .append('g')
+            // .classed('svg-col-group', true)
+            .append('rect')
+            .attr('x',(d,i,n)=>i*scaleValue(1,timeSeg.length,1000))
+            .attr('y',0)
+            .attr('width',(d,i,n)=>scaleValue(1,timeSeg.length,1000))
+            .attr('height',1000)
+            .classed('bg-rect', true)
+            // .attr('transform', (d,i,n)=>'translate('+(d-1)*(scaleValue(1,timeSeg.length,1000))+' 0)')
+            .style('fill','black')
+
+
+        // mSvg.selectAll('.svg-col-group')
+        //     .append('g')
+        //     .classed('sq-group', true);
+
+
+
+
+
+
+        
+        // Populates scale select dropdown
+        d3.select('#scale-select').selectAll()
+            .data(Tonal.Scale.names())
+            .enter()
+            .append("option")
+            .attr('value',(d,i,n) => d)
+            .text((d,i,n) => d);
+
+
+        // d3.selectAll('input').on('change', ()=>{
+        //     d3.select('#sequence-gen-btn').on('click',()=>{});
+        //     d3.select('#sequence-gen-btn').on('click',(d,i,n)=>{
+        //         createSequencer();
+        //     })
+        // })
+
+        let clearTones = () =>{};
+
+        d3.select('#sequence-gen-btn').on('click',(d,i,n)=>{
+            createSequencer();
+        })
+
+        let createSequencer = () =>{
+
+            d3.selectAll('.note-row').remove();
+
+            clearTones();
+
+            let key = d3.select('#key-select option:checked').property('value');
+            let scale = d3.select('#scale-select option:checked').property('value');
+            let octave = parseInt(d3.select('#octave-select option:checked').property('value'));
+
+            let scaleSelectArr = Tonal.Scale.get(key+" "+scale).notes;
+
+            scaleSelectArr = scaleSelectArr.concat(scaleSelectArr);
+
+            scaleLen = fillRange(1, scaleSelectArr.length);
+
+            mSvg.selectAll()
+                .data(scaleLen)
+                .enter()
+                .append('g')
+                .attr('transform', (d,i,n)=>'translate('+scaleValue(1,timeSeg.length,1000)/4+' '+(d)*(scaleValue(1,scaleLen.length+2,1000))+')')
+                .classed('note-row', true)
+                .selectAll()
+                .data(timeSeg)
+                .enter()
+                .append('rect')
+                .classed('note-rect', true)
+                .attr('x',(d,i,n)=>(i*scaleValue(1,timeSeg.length,1000)))
+                .attr('y',0)
+                .attr('width',(d,i,n)=>scaleValue(1,timeSeg.length,1000)/2)
+                .attr('height',(d,i,n)=>scaleValue(1,scaleLen.length,1000)/2)
+                // .style('fill', 'white')
+                .on('click',(d,i,n)=>{
+                    let currClass = d3.select(n[i]).attr('class');
+                    if(currClass === null) currClass = '';
+                    // console.log(currClass.includes('selected'))
+                    if(currClass.includes('selected')){
+                        d3.select(n[i]).attr('class','note-rect')
+                    }else{
+                        d3.select(n[i]).attr('class','note-rect selected')
+                    }
+                });
+
+            let synths = [];
+
+            // Lower Tones
+            for(let x = 0; x < scaleSelectArr.length/2; x++){
+                scaleSelectArr[x] += octave
+                // synths.push(new Tone.AMSynth());
+                // synths.push(new Tone.MonoSynth());
+                // synths.push(new Tone.DuoSynth());
+                synths.push(new Tone.Synth());
+
+
+                synths[x].oscillator.type = 'sine';
+            }
+
+            // console.log(synths)
+
+            // Higher Tones
+            for(let x = scaleSelectArr.length/2; x < scaleSelectArr.length; x++){
+                scaleSelectArr[x] += (octave+1)
+                synths.push(new Tone.Synth());
+                // synths.push(new Tone.FMSynth());
+                // synths.push(new Tone.DuoSynth());
+
+
+                // synths[x].oscillator.type = 'square';
+
+            }
+            
+            // console.log(synths)
+
+
+
+            // for(let x = 1; x < scaleSelectArr.length; x++){
+                // checkGroups
+                // console.log(x)
+                // let checkGroup = 
+                // d3.select('.checkgroup').clone(true).attr('class','clone');
+
+                // d3.select('#main-container').append(checkGroup);
+
+            // }
+                    
+
+            synths.forEach(synth => synth.toMaster());
+
+            // const $rows = document.querySelectorAll('div > div'),
+            const $rows = document.querySelectorAll('.note-row'),
+                // notes = ['G5', 'G4', 'E4', 'E3', 'C3', 'C2'];
+                notes = scaleSelectArr;
+            let index = 0;
+            // console.log($rows)
+            // $rows[1].style.backgroundColor = 'red';
+
+            let repeat = time => {
+                d3.selectAll('.bg-rect').style('fill','black')
+                let step = index % timeSeg.length;
+                for(let i = 0; i < $rows.length; i++){
+                    let synth = synths[i],
+                        note = notes[i],
+                        $row = $rows[i],
+                        $input = $row.querySelector(`rect:nth-child(${step+1})`);
+                    if(d3.select($input).attr('class').includes('selected')) synth.triggerAttackRelease(note , '8n', time);
+                }
+                index++;
+                d3.select(`.bg-rect:nth-child(${step+1})`).style('fill','#531253')
+            }
+
+            Tone.Transport.scheduleRepeat(repeat,'8n');
+
+            d3.select('#tone1').on('click',() => {
+                Tone.Transport.start();
+                // console.log(Tone.Transport.bpm)
+            })
+
+            d3.select('#tone2').on('click',() => {
+                Tone.Transport.stop();
+                // console.log(Tone.Transport.bpm)
+            })
+            // Tone.Transport.clear()
+
+            // console.log(Tone.Transport)
+            clearTones = () => {
+                Tone.Transport.cancel()
+
+            }
+        }
+
+        d3.select('#key-select').on('change',()=>{
+            createSequencer();
+        });
+        d3.select('#scale-select').on('change',()=>{
+            createSequencer();
+        });
+        d3.select('#octave-select').on('change',()=>{
+            createSequencer();
+        });
+
+        // const synths = [
+        //     new Tone.Synth(),
+        //     new Tone.Synth(),
+        //     new Tone.Synth(),
+        //     new Tone.Synth(),
+        //     new Tone.Synth(),
+        //     new Tone.Synth()
+        // ];
+
+        // // synths[0].oscillator.type = 'triangle';
+        // // synths[1].oscillator.type = 'sine';
+        // // synths[2].oscillator.type = 'sawtooth';
+        // // synths[3].oscillator.type = 'triangle';
+        // // synths[4].oscillator.type = 'sine';
+        // // synths[5].oscillator.type = 'sawtooth';
+
+        // synths.forEach(synth => synth.toMaster());
+
+        // let scaleSelect = Tonal.Scale.get("Eb kumoijoshi").notes;
+        // for(let i = 0; i < scaleSelect.length; i++){
+        //     scaleSelect[i] += 10
+        // }
+        // // console.log(scaleSelect);
+
+
+        // const $rows = document.querySelectorAll('div > div > div'),
+        //     // notes = ['G5', 'G4', 'E4', 'E3', 'C3', 'C2'];
+        //     notes = scaleSelect;
+        // let index = 0;
+        // console.log($rows)
+        // $rows[1].style.backgroundColor = 'red';
+
+
+        // let repeat = time => {
+        //     let step = index % 8;
+        //     for(let i = 0; i < $rows.length; i++){
+        //         let synth = synths[i],
+        //             note = notes[i],
+        //             $row = $rows[i],
+        //             $input = $row.querySelector(`input:nth-child(${step+1})`);
+        //         if($input.checked) synth.triggerAttackRelease(note , '8n', time);
+
+
+        //     }
+        //     index++;
+        //     console.log(step);
+        // }
+
+        // Tone.Transport.scheduleRepeat(repeat,'4n');
+
+
+
+        
+
+    </script>
+
+</body>
+</html>
