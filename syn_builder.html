@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <link rel="stylesheet" type="text/css" href="../_css_files/default_reset.css"> -->
+
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" type="text/css" href="./assets/css/style.css"> -->
+    <title>D3</title>
+
+    <style>
+        body{
+            /* background-color: black; */
+            background-color: black;
+            touch-action: none;
+            
+        }
+        .nav-link{
+            display: inline-block;
+            background-color: white;
+            color: black;
+            padding: 3px;
+            margin: 3px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .nav-link:focus, .nav-link:visited{
+            text-decoration: none;
+            color: black;
+        }
+        #nav-container{
+            height: 4vh;
+        }
+
+        #main-container{
+            width: 100vw;
+            height: 95vh;
+        } 
+        svg{
+            width: 100%;
+            height: 99%;
+        }
+
+        svg{
+            transform: scaleY(-1);
+        }
+        rect{
+            fill: rgb(140, 150, 151);
+            /* transition: all 0.2s ease-in-out; */
+        }
+        rect.selected{
+            fill: #97D8B2;
+        }
+        .bg-rect.odd{
+            opacity: 0.5;
+            fill: #6e196e !important
+        }
+        .bg-rect{
+            opacity: 0.5;
+            fill: rgb(42, 108, 124) !important;
+
+            stroke: white;
+        }
+        /* .bg-rect:nth-child(1n),.bg-rect:nth-child(2n),.bg-rect:nth-child(3n),.bg-rect:nth-child(4n){ */
+        .bg-rect:nth-child(4n+1){
+            opacity: 0.5;
+            fill: rgb(20, 42, 82) !important;
+            /* fill: rgb(85, 91, 92) !important; */
+
+            stroke: white;
+        }
+        /* .bg-rect:nth-child(8n){
+            opacity: 0.5;
+            fill: rgb(121, 129, 131) !important;
+            stroke: white;
+        } */
+        #note-rect-context-menu{
+            display: none;
+            position: fixed;
+            z-index: 10;
+            width: 100px;
+            padding: 5px;
+            background-color: white;
+        }
+        #note-rect-context-menu button{
+            width: 100%;
+            /* background-color: white; */
+        }
+        .hide-note{
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="main-controls" class="container my-3">
+        <div class="row">
+            <div class="col-12">
+                <a href="./index.html" class="nav-link">back</a>
+            </div>
+            <div class="col-12">
+                <div id="note-rect-context-menu">
+                    <!-- <button value="16n">1/16</button><br>
+                    <button value="8n">1/8</button><br>
+                    <button value="4n">1/4 </button><br>
+                    <button value="2n">1/2</button><br>
+                    <button value="1n">Whole</button> -->
+                    <button value="plus">+</button>
+                    <button value="minus">-</button>
+
+                </div>
+                <input id="bpm-switch" min="30" max="240" step="10" value="120" type="number"/>
+                <button id="add-more-chunks" type="button">ADD MORE NOTES</button>
+                <button id="tone1">play</button>
+                <button id="tone2">stop</button>
+                <button id="record-btn">record</button>
+                <a id="download-link" href="" download>download</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="synth-holder" class="container">
+        <div id="empty-main-synth" class="row synth-row" style="display: none;">
+            <div class="col-6">
+                <h2 style="color: white;" class="scale-title"></h2>
+            </div>
+            <div class="col-6">
+                <select class="key-select">
+                    <option value="C" selected>C</option>
+                    <option value="C#">C#</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="Eb">Eb</option>
+                    <option value="F">F</option>
+                    <option value="F#">F#</option>
+                    <option value="G">G</option>
+                    <option value="G#">G#</option>
+                    <option value="A">A</option>
+                    <option value="Bb">Bb</option>
+                    <option value="B">B</option>
+                </select>
+            
+                <select class="octave-select">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4" selected>4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <!-- <option value="9">9</option> -->
+                </select>
+            
+                <select class="osc-type-select">
+                    <option value="sine" selected>sine</option>
+                    <option value="sawtooth">sawtooth</option>
+                    <option value="triangle">triangle</option>
+                    <option value="square">square</option>
+                    <!-- <option value="9">9</option> -->
+                </select>
+
+            </div>
+
+            <div class="col-12">
+                <div style="width: 100%; overflow-x: auto;">
+                    <div style="width: 100%; height: 500px;" >
+                        <svg width="1000" height="1000" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="sequencer-add-contols" class="container my-2">
+        <div class="row">
+            <div class="col-12" style="text-align: center;">
+                <select id="scale-select"></select>            
+                <button id="sequence-gen-btn" type="button">ADD STEP SEQUENCER</button>
+            </div>
+        </div>
+    </div>
+
+
+
+     <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <script src="./assets/js/d3.min.js"></script>
+    <script src="./assets/js/tonal.min.js"></script>
+    <script src="./assets/js/tone.js"></script>
+
+    <script>
+
+        let scaleValue = (num,max1,max2) => ((max2*num)/max1).toFixed(2);
+
+        // function for generating array of sequential numbers
+        let fillRange = (start, end) => {
+            return Array(end - start + 1).fill().map((item, index) => start + index);
+        };
+
+        // Gives array for # of squares in a row
+        let timeSeg = fillRange(1, 16);
+
+        // Declares empty array for column height
+        // let scaleLen = [];
+
+        let noteValRef = {
+            'A': 10, 
+            'A#': 11,
+            'Bb': 11,
+            'B': 12,
+            'B#': 12,
+            'Cb': 1,
+            'C': 1,
+            'C#': 2,
+            'Db':2, 
+            'D': 3, 
+            'D#': 4,
+            'Eb': 4,
+            'E': 5,
+            'E#': 6,
+            'Fb': 5,
+            'F': 6,
+            'F#': 7,
+            'Gb': 7,
+            'G': 8,
+            'G#': 9,
+            'Ab': 9
+        }
+
+        let doubleHalfStepFix = ['C','D','E','F','G','A','B'];
+
+        let allScaleNames = Tonal.Scale.names().sort();
+        
+        // Populates scale select dropdown
+        d3.select('#scale-select')
+            .selectAll()
+            .data(allScaleNames)
+            .enter()
+            .append("option")
+            .attr('value',(d,i,n) => d)
+            .text((d,i,n) => d);
+
+        // let clearTones = () =>{}; // ?? clearing
+        // let clearTones = () =>{}; // ?? clearing
+        // let clearTones = () =>{}; // ?? clearing
+        // let clearTones = () =>{}; // ?? clearing
+
+
+
+
+        // close right click menu on off click
+        $(document).mouseup(function(e) {
+            // $('.corp-detail-dropdown').each(function(){
+                let dropdown = $('#note-rect-context-menu');
+                if(
+                    dropdown.css('display') !== 'none' &&
+                    !dropdown.is(e.target) &&
+                    dropdown.has(e.target).length === 0
+                ){
+                    dropdown.toggle('display');
+                }
+            // });
+        });
+
+        d3.select('#sequence-gen-btn').on('click',(d,i,n)=>{ // appends new sequencer
+
+            let newSynthRow = $('#empty-main-synth').clone().attr('id','').css('display','flex');
+            newSynthRow.attr('data-scale-select', $('#scale-select option:checked').val());
+            newSynthRow.find('.scale-title').text($('#scale-select option:checked').val());
+            $('#synth-holder').append(newSynthRow);
+
+
+            if($('svg').length > 2){
+                Tone.Transport.cancel();
+            }
+
+            $('#record-btn').off('click');
+
+            $('svg').each(function(i){
+                if(i === ($('svg').length-1)){
+                    createSequencer($(this), true);
+
+                }else{
+                    createSequencer($(this), false);
+                }
+            })
+            
+        })
+
+        let clickedNoteRect; // Placeholder for setting right-clicked note
+        let parseNoteTimeVal = (xClass)=>{
+                let xVal;
+                for(let x=16; x>0; x--){
+                    if(xClass.indexOf(x+'x') > -1){
+                        xVal = x+'x';
+                        x=0;
+                    }
+                }
+                return xVal
+            }
+
+        $('#note-rect-context-menu button').on('click', function(){
+            
+            let clickedNoteClass = clickedNoteRect.attr('class');
+
+            
+            console.log($(clickedNoteRect.node()).index())
+
+            let nextVisNote = $(clickedNoteRect.node()).nextAll('.note-rect').not('.hide-note').first();
+
+
+            let clickedNoteLen = parseInt(parseNoteTimeVal(clickedNoteClass));
+
+
+            if($(this).val() === 'plus'){
+
+                if(nextVisNote.index() < 0){
+                    return false;
+                }
+
+                let nextVisNoteClass = d3.select(nextVisNote[0]).attr('class');/////
+
+                let nextVisNoteLen = parseInt(parseNoteTimeVal(nextVisNoteClass));
+
+                if(clickedNoteLen+nextVisNoteLen <= 16){
+
+                    clickedNoteRect
+                        .attr('width',scaleValue(1,16,1000)*((clickedNoteLen+nextVisNoteLen)-0.5))
+                        .classed(parseNoteTimeVal(clickedNoteClass),false)
+                        .classed((clickedNoteLen+nextVisNoteLen)+'x',true)
+
+                    d3.select(nextVisNote[0])
+                        .attr('width',scaleValue(1,16,1000)*0.5)
+                        .attr('class','note-rect 1x hide-note');
+
+                }
+
+            }else{
+                
+                if(clickedNoteLen > 1){
+
+                    let nextHideNote;
+                    
+                    $(clickedNoteRect.node()).nextAll('.hide-note').each(function(){
+                        if(!$(this).next('.note-rect').hasClass('hide-note')){
+                            nextHideNote = $(this);
+                            return false;
+                        }
+                    })
+
+                    clickedNoteRect
+                        .attr('width',scaleValue(1,16,1000)*(clickedNoteLen-1.5))
+                        .classed(parseNoteTimeVal(clickedNoteClass),false)
+                        .classed((clickedNoteLen-1)+'x',true)
+
+                    d3.select(nextHideNote[0])
+                        .classed('hide-note',false)
+
+                }
+            }
+
+
+            
+
+
+        })
+
+        let genNewGrid = (svg, scaleLen) => {
+
+            // let bgToggleFlag = true;
+
+            let currentViewBoxWidth = parseInt(svg.attr('viewBox').split(' ')[2]);
+
+            // Creates base for svg note toggle with respective backing for each column for time step indication
+            svg.append('g')
+                .classed('background-rects', true)
+                .selectAll()
+                .data(timeSeg)
+                .enter()
+                .append('rect')
+                .attr('x',(d,i,n)=>i*scaleValue(1,timeSeg.length,currentViewBoxWidth))
+                .attr('y',0)
+                .attr('width',(d,i,n)=>scaleValue(1,timeSeg.length,currentViewBoxWidth))
+                .attr('height',1000)
+                .attr('class',(d,i,n)=>{
+                    if((Math.ceil(d/16)) % 2 === 0){
+                        return 'bg-rect odd';
+
+                    }else{
+                        return 'bg-rect';
+                        
+                    }
+                })
+                .style('fill','black')
+
+
+            // adds rows with clickable 'note' squares in them
+            svg.selectAll()
+                .data(scaleLen)
+                .enter()
+                .append('g')
+                .attr('transform', (d,i,n)=>'translate('+scaleValue(1,timeSeg.length,currentViewBoxWidth)/4+' '+(d)*(scaleValue(1,scaleLen.length+2,1000))+')')
+                .classed('note-row', true)
+                .selectAll()
+                .data(timeSeg)
+                .enter()
+                .append('rect')
+                .classed('note-rect', true)
+                .classed('1x',true)
+                .attr('x',(d,i,n)=>(i*scaleValue(1,timeSeg.length,currentViewBoxWidth)))
+                .attr('y',0)
+                .attr('width',(d,i,n)=>scaleValue(1,timeSeg.length,currentViewBoxWidth)/2)
+                .attr('height',(d,i,n)=>scaleValue(1,scaleLen.length,1000)/2)
+                // .style('fill', 'white')
+                .on('click',(d,i,n)=>{
+                    if(d3.select(n[i]).classed('selected')){
+                        d3.select(n[i]).classed('selected',false)
+                    }else{
+                        d3.select(n[i]).classed('selected',true)
+                    }
+                })
+                .on("contextmenu", function (d,i,n) {
+                    clickedNoteRect = d3.select(n[i]);
+                    d3.event.preventDefault();
+                    let mouseX = d3.event.pageX;
+                    let mouseY = d3.event.pageY-$(window).scrollTop();
+                    d3.select('#note-rect-context-menu')
+                        .style('left', mouseX+'px')
+                        .style('top', mouseY+'px')
+                        .style('display', 'block')
+                // react on right-clicking
+                })
+        
+            // Click drag note adding
+            // svg.on('mousedown',(d,i,n)=>{
+            //     d3.selectAll('.note-rect').on('mouseenter',(d,i,n)=>{
+            //         let currClass = d3.select(n[i]).attr('class');
+            //         if(currClass === null) currClass = '';
+            //         if(!currClass.includes('selected')){
+            //             d3.select(n[i]).attr('class','note-rect selected')
+            //         }
+            //     })
+            // }).on('mouseup',(d,i,n)=>{
+            //     d3.selectAll('.note-rect').on('mouseenter',()=>{})
+            // });
+
+
+        };// END genNewGrid()
+
+        let recordFlag = false;
+        let repeat;
+
+        let recorder;
+        const actx  = Tone.context;
+        const dest  = actx.createMediaStreamDestination();
+
+
+
+
+        // let index = 0;
+
+
+        let createSequencer = (svg, newSeq) =>{
+
+            // recordFlag=true;
+
+            // Tone.Master.dispose()
+            d3Svg = d3.select(svg.get(0))
+
+            // d3.selectAll('.note-row').remove();
+
+            //
+            //
+            //
+            // const actx  = Tone.context;
+            // const dest  = actx.createMediaStreamDestination();
+            recorder = new MediaRecorder(dest.stream);
+            //
+            //
+            //
+
+            let key,scale,octave,oscType,scaleSelectArr,synths,baseRef,notes,scaleLen;
+
+            let setNotes = () =>{
+
+                key = svg.parents('.synth-row').find('.key-select option:checked').val();
+
+                console.log(key)
+
+                // if(newSeq){
+                    // scale = $('#scale-select option:checked').val();
+                // }else{
+                scale = svg.parents('.synth-row').attr('data-scale-select');
+                // }
+                
+                octave = parseInt(svg.parents('.synth-row').find('.octave-select option:checked').val());
+                oscType = svg.parents('.synth-row').find('.osc-type-select option:checked').val();
+
+                scaleSelectArr = Tonal.Scale.get(key+" "+scale).notes; // gets scale from base key note
+
+                scaleSelectArr = scaleSelectArr.concat(scaleSelectArr); // doubles it to include 2 octaves
+
+                scaleLen = fillRange(1, scaleSelectArr.length); // create sequential array based on the length of the selected scale
+                svg.parents('.synth-row').attr('data-scale-len', scaleLen.length)
+
+
+                synths = []; // Empty array for synth notes
+
+                baseRef = noteValRef[key];//set base value for scale step up
+
+                // ALL TONES (used to just be Lower Tones) 
+                for(let x = 0; x < scaleSelectArr.length; x++){ // Loop though scale to create new Tones
+
+                    // fix for double sharps and flats
+                    if(scaleSelectArr[x].includes('##')){ 
+                        let baseNote = scaleSelectArr[x].replace('##','');
+                        scaleSelectArr[x] = doubleHalfStepFix[doubleHalfStepFix.indexOf(baseNote)+1];
+                    }else if(scaleSelectArr[x].includes('bb')){
+                        let baseNote = scaleSelectArr[x].replace('bb','');
+                        scaleSelectArr[x] = doubleHalfStepFix[doubleHalfStepFix.indexOf(baseNote)-1];
+                    }
+
+                    if(noteValRef[scaleSelectArr[x]] < baseRef){ // adds octave value accordingly
+                        if(x < scaleSelectArr.length/2){
+                            scaleSelectArr[x] += (octave+1)
+                        }else{
+                            scaleSelectArr[x] += (octave+2)
+                        }
+                    }else{
+                        if(x < scaleSelectArr.length/2){
+                            scaleSelectArr[x] += (octave)
+                        }else{
+                            scaleSelectArr[x] += (octave+1)
+                        }
+                        // scaleSelectArr[x] += (octave)
+                    }
+                    synths.push(new Tone.Synth());
+                    synths[x].oscillator.type = oscType;
+                }
+                
+                // if(recordFlag){
+                    synths.forEach(synth => synth.connect(dest)); // Add
+                // }
+
+                synths.forEach(synth => synth.toMaster()); // Add synths to master
+
+                notes = scaleSelectArr; //
+
+            }
+            setNotes();
+
+            if(newSeq){
+                genNewGrid(d3Svg, scaleLen);
+            }
+
+            //
+            //
+            //
+            const chunks = [];
+            //
+            //
+            //
+
+            let $rows = svg.find('.note-row');
+            let index = 0;
+
+            repeat = time => {
+                if(recordFlag){
+                    // if(index === 0){
+                    //     recorder.start();
+                    // }
+                    if(index === timeSeg.length+1){
+                        recorder.stop();
+                        recordFlag =false;
+                    } 
+                }
+
+                d3.selectAll('.bg-rect').style('opacity','0.5')
+                let step = index % timeSeg.length;
+                for(let i = 0; i < $rows.length; i++){
+                    let synth = synths[i],
+                        note = notes[i],
+                        $row = $rows[i],
+                        $input = $row.querySelector(`rect:nth-child(${step+1})`);
+
+
+                    if(d3.select($input).attr('class').includes('selected')){
+                        let noteAttackTime = parseInt(parseNoteTimeVal(d3.select($input).attr('class')));
+                        synth.triggerAttackRelease(note , '0:0:'+noteAttackTime, time);
+                    }
+                    
+                }
+                index++;
+                d3.selectAll(`.bg-rect:nth-child(${step+1})`).style('opacity','1')
+            }
+
+            // Tone.Transport.stop();
+            Tone.Transport.stop();
+            Tone.Transport.time = 0
+            Tone.Transport.scheduleRepeat(repeat,'0:0:1');
+
+            
+
+            svg.parents('.synth-row').find('.key-select, .octave-select, .osc-type-select').on('change',()=>{
+                // createSequencer();
+                setNotes();
+
+            });
+
+            // Tone.Master.dispose()
+            
+
+            
+
+
+            recorder.ondataavailable = evt => chunks.push(evt.data);
+            console.log('try it later')
+            recorder.onstop = evt => {
+                console.log('try it now')
+                let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+
+                $('#download-link').attr('href',URL.createObjectURL(blob))
+                console.log('try it now')
+                // audio.src = URL.createObjectURL(blob);
+            };
+
+
+            $('#record-btn').on('click',() => {
+                Tone.Transport.stop();
+                Tone.Transport.time = 0;
+                index = 0;
+                recordFlag = true;
+                Tone.Transport.start();
+                if(recorder.state !=='recording'){
+                    recorder.start();
+                }
+            })
+
+
+            
+        } // END Create Sequencer 
+
+        d3.select('#tone1').on('click',() => {
+            // index=0
+            Tone.Transport.start();
+            // recorder.start();
+        })
+        
+
+        d3.select('#tone2').on('click',() => {
+            Tone.Transport.stop();
+        })
+        
+        // d3.select('#record-btn').on('click',() => {
+        //     Tone.Transport.stop();
+        //     Tone.Transport.time = 0;
+        //     index = 0;
+        //     Tone.Transport.start();
+        // })
+
+
+        d3.select('#bpm-switch').on('change',(d,i,n)=>{
+            Tone.Transport.bpm.value = parseInt(d3.select(n[i]).property('value'));
+        });
+        // d3.select('#scale-select').on('change',()=>{
+        //     createSequencer();
+        // });
+
+
+        d3.select('#add-more-chunks').on('click',(d,i,n)=>{ // adds 16 more notes NEED TO ADJUST FOR MULTIPLE SEQUENCERS
+
+            let addSeg;
+
+            $('svg').each(function(si){
+            // })
+
+
+                let mSvg = d3.select($(this).get(0));
+                let $msvg = $(this);
+
+                let currentViewBox = $(this).attr('viewBox').split(' ');
+                currentViewBox[2] = parseInt(currentViewBox[2])+1000;
+                $(this).parent('div').css('width',(currentViewBox[2]/10)+'%');
+                let newViewBox = currentViewBox.join(' ');
+                $(this).attr('viewBox', newViewBox);
+
+                    // let timeSeg = fillRange(1, 16);
+                if(si>0){
+
+
+                    let newSeg = fillRange(timeSeg.length+1, timeSeg.length+16);
+
+                    if(si===1){
+                        addSeg=newSeg;
+                    }
+
+
+                    if((newSeg[newSeg.length-1]/16)%2===0){
+
+                        mSvg.select('.background-rects')
+                        .selectAll()
+                        .data(newSeg)
+                        .enter()
+                        .append('rect')
+                        .attr('x',(d,i,n)=>(d-1)*scaleValue(1,newSeg.length,1000))
+                        .attr('y',0)
+                        .attr('width',(d,i,n)=>scaleValue(1,newSeg.length,1000))
+                        .attr('height',1000)
+                        .classed('bg-rect odd', true)
+                        .style('fill','black')
+
+                    }else{
+                        mSvg.select('.background-rects')
+                        .selectAll()
+                        .data(newSeg)
+                        .enter()
+                        .append('rect')
+                        .attr('x',(d,i,n)=>{
+                            return (d-1)*scaleValue(1,newSeg.length,1000)
+                        })
+                        .attr('y',0)
+                        .attr('width',(d,i,n)=>scaleValue(1,newSeg.length,1000))
+                        .attr('height',1000)
+                        .classed('bg-rect', true)
+                        .style('fill','black')
+
+                    }
+
+                    let checkNum = 0
+
+                    mSvg.selectAll('.note-row')
+                        // .attr('y',()=>{
+                        //     checkNum++;
+
+                        //     return 0
+                        // })
+                        .selectAll()
+                        .data(newSeg)
+                        .enter()
+                        .append('rect')
+                        .attr('class', 'note-rect 1x')
+                        .attr('x',(d,i,n)=>{
+                            return (d-1)*scaleValue(1,n.length,1000)
+                        })
+                        .attr('y',0)
+                        .attr('width',(d,i,n)=>scaleValue(1,n.length,1000)/2)
+                        .attr('height',(d,i,n)=>{
+                            let scaleLen = parseInt($msvg.parents('.synth-row').attr('data-scale-len'));
+                            return scaleValue(1,scaleLen,1000)/2
+                        })
+                        // .style('fill', 'white')
+                        .on('click',(d,i,n)=>{
+                            if(d3.select(n[i]).classed('selected')){
+                                d3.select(n[i]).classed('selected',false)
+                            }else{
+                                d3.select(n[i]).classed('selected',true)
+                            }
+                        })
+                        .on("contextmenu", function (d,i,n) {
+                            clickedNoteRect = d3.select(n[i]);
+                            d3.event.preventDefault();
+                            let mouseX = d3.event.pageX;
+                            let mouseY = d3.event.pageY-$(window).scrollTop();
+                            d3.select('#note-rect-context-menu')
+                                .style('left', mouseX+'px')
+                                .style('top', mouseY+'px')
+                                .style('display', 'block')
+                        // react on right-clicking
+                        });
+
+
+                        // Tone.Transport.stop();
+                        // Tone.Transport.time = 0
+
+                }
+
+                
+
+                
+            })
+
+            timeSeg = timeSeg.concat(addSeg);
+
+            console.log(timeSeg)
+
+            Tone.Transport.cancel();
+            $('#record-btn').off('click');
+
+
+            $('svg').each(function(i){
+                if($(this).parents('#empty-main-synth').index() === -1){
+
+                    createSequencer($(this), false);
+                }
+            })
+            
+        });
+
+
+
+
+
+
+
+
+
+
+
+        // console.clear();
+
+        // // UPDATE: there is a problem in chrome with starting audio context
+        // //  before a user gesture. This fixes it.
+        // var started = false;
+        // document.documentElement.addEventListener('mousedown', () => {
+        // if (started) return;
+        // started = true;
+        // const audio = document.querySelector('audio');
+        // const synth = new Tone.Synth();
+        // const actx  = Tone.context;
+        // const dest  = actx.createMediaStreamDestination();
+        // const recorder = new MediaRecorder(dest.stream);
+
+        // synth.connect(dest);
+        // synth.toMaster();
+
+        // const chunks = [];
+
+        // const notes = 'CDEFGAB'.split('').map(n => `${n}4`);
+        // let note = 0;
+        // Tone.Transport.scheduleRepeat(time => {
+        //     if (note === 0) recorder.start();
+        //     if (note > notes.length) {
+        //     synth.triggerRelease(time)
+        //     recorder.stop();
+        //     Tone.Transport.stop();
+        //     } else synth.triggerAttack(notes[note], time);
+        //     note++;
+        // }, '4n');
+
+        // recorder.ondataavailable = evt => chunks.push(evt.data);
+        // recorder.onstop = evt => {
+        //     let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+        //     audio.src = URL.createObjectURL(blob);
+        // };
+
+        // Tone.Transport.start();
+        // });
+
+
+    </script>
+
+</body>
+</html>
