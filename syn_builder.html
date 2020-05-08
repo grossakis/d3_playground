@@ -567,7 +567,7 @@
             //
             //
             //
-            const chunks = [];
+            let chunks = [];
             //
             //
             //
@@ -576,15 +576,7 @@
             let index = 0;
 
             repeat = time => {
-                if(recordFlag){
-                    // if(index === 0){
-                    //     recorder.start();
-                    // }
-                    if(index === timeSeg.length+1){
-                        recorder.stop();
-                        recordFlag =false;
-                    } 
-                }
+                
 
                 d3.selectAll('.bg-rect').style('opacity','0.5')
                 let step = index % timeSeg.length;
@@ -598,6 +590,16 @@
                     if(d3.select($input).attr('class').includes('selected')){
                         let noteAttackTime = parseInt(parseNoteTimeVal(d3.select($input).attr('class')));
                         synth.triggerAttackRelease(note , '0:0:'+noteAttackTime, time);
+                    }
+
+                    if(recordFlag){
+                        if(index === timeSeg.length+1){
+                            
+                            recorder.stop();
+                            Tone.Transport.stop();
+                            recordFlag =false;
+                            return false
+                        } 
                     }
                     
                 }
@@ -643,6 +645,7 @@
                 recordFlag = true;
                 Tone.Transport.start();
                 if(recorder.state !=='recording'){
+                    chunks=[];
                     recorder.start();
                 }
             })
